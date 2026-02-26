@@ -46,7 +46,7 @@ module tb_async_fifo_smoke;
     initial begin
         $display("[TB] async_fifo smoke start");
         `ifdef DUMP_FSDB
-            $fsdbDumpfile("sim/out/wave.fsdb");
+            $fsdbDumpfile("wave.fsdb");
             $fsdbDumpvars(0, tb_async_fifo_smoke);
         `endif
 
