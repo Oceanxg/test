@@ -11,10 +11,13 @@ VCS_FLAGS := -full64 -sverilog -timescale=1ns/1ps -debug_access+all \
              -kdb -lca -f $(FILELIST) -top $(TOP) \
              +lint=TFIPC-L +v2k +warn=noTFIPC +ntb_random_seed=$(SEED)
 VERDI    ?= verdi
+BSUB_RUN ?= bsub -q normal -Is
 
 SIMV     := $(OUT_DIR)/simv
 CMP_LOG  := $(OUT_DIR)/compile.log
 RUN_LOG  := $(OUT_DIR)/run.log
+
+.DEFAULT_GOAL := all
 
 .PHONY: help all smoke compile run verdi clean
 
@@ -32,7 +35,7 @@ smoke: compile run
 
 compile:
 	@mkdir -p $(OUT_DIR)
-	bsub -q normal -Is $(VCS) $(VCS_FLAGS) -o $(SIMV) -l $(CMP_LOG)
+	$(BSUB_RUN) $(VCS) $(VCS_FLAGS) -o $(SIMV) -l $(CMP_LOG)
 
 run:
 	@if [ ! -x $(SIMV) ]; then echo "[ERR] $(SIMV) not found, run 'make compile' first"; exit 1; fi
@@ -42,7 +45,7 @@ run:
 
 verdi:
 	@if [ ! -f $(OUT_DIR)/wave.fsdb ]; then echo "[ERR] FSDB not found, run 'make run' first"; exit 1; fi
-	bsub -q normal -Is $(VERDI) -sv -f $(FILELIST) -ssf $(OUT_DIR)/wave.fsdb &
+	$(BSUB_RUN) $(VERDI) -sv -f $(FILELIST) -ssf $(OUT_DIR)/wave.fsdb &
 
 clean:
 	rm -rf $(OUT_DIR) csrc ucli.key novas* verdiLog *.log
