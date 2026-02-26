@@ -17,6 +17,8 @@ SIMV     := $(OUT_DIR)/simv
 CMP_LOG  := $(OUT_DIR)/compile.log
 RUN_LOG  := $(OUT_DIR)/run.log
 
+.DEFAULT_GOAL := all
+
 .PHONY: help all smoke compile run verdi clean
 
 help:
