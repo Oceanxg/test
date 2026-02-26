@@ -12,6 +12,7 @@ VCS_FLAGS := -full64 -sverilog -timescale=1ns/1ps -debug_access+all \
              +lint=TFIPC-L +v2k +warn=noTFIPC +ntb_random_seed=$(SEED)
 VERDI    ?= verdi
 BSUB_RUN ?= bsub -q normal -Is
+
 SIMV     := $(OUT_DIR)/simv
 CMP_LOG  := $(OUT_DIR)/compile.log
 RUN_LOG  := $(OUT_DIR)/run.log
