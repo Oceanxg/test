@@ -9,7 +9,7 @@ SEED     ?= 1
 VCS      ?= vcs
 VCS_FLAGS := -full64 -sverilog -timescale=1ns/1ps -debug_access+all \
              -kdb -lca -f $(FILELIST) -top $(TOP) \
-             +lint=TFIPC-L +v2k +warn=noTFIPC +ntb_random_seed=$(SEED)
+             +lint=TFIPC-L +v2k +warn=noTFIPC +define+DUMP_FSDB +ntb_random_seed=$(SEED)
 VERDI    ?= verdi
 BSUB_RUN ?= bsub -q normal -Is
 
@@ -39,7 +39,7 @@ compile:
 
 run:
 	@if [ ! -x $(SIMV) ]; then echo "[ERR] $(SIMV) not found, run 'make compile' first"; exit 1; fi
-	cd $(OUT_DIR) && ./simv +define+DUMP_FSDB -l run.log
+	cd $(OUT_DIR) && ./simv -l run.log
 	@echo "[INFO] run log: $(RUN_LOG)"
 	@echo "[INFO] fsdb   : $(OUT_DIR)/wave.fsdb"
 
