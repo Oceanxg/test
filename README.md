@@ -1,11 +1,11 @@
-# Async FIFO 本地仿真冒烟项目（VCS + Verdi）
+# Async FIFO Local Smoke Simulation Project (VCS + Verdi)
 
-这个项目用于你在提交给验证人员之前，快速本地自检：
-- 使用 **VCS** 编译/仿真
-- 使用 **Verdi** 打开 FSDB 波形
-- 使用一个 **Makefile** 完成编译、运行、看波形、清理
+This project is a lightweight local sanity-check flow you can run before handing RTL to verification:
+- Compile and simulate with **VCS**
+- Open FSDB waveforms with **Verdi**
+- Use one **Makefile** for compile, run, waveform viewing, and cleanup
 
-## 目录结构
+## Directory Layout
 
 ```text
 .
@@ -18,57 +18,57 @@
     └── filelist.f
 ```
 
-## 依赖
+## Dependencies
 
-请确保你的环境已经配置好：
+Make sure your environment provides:
 - `vcs`
 - `verdi`
-- FSDB dump 相关 PLI（通常由 Verdi 环境提供）
+- FSDB dump PLI support (typically provided by the Verdi setup)
 
-## 一键冒烟
+## One-Command Smoke Run
 
 ```bash
 make smoke
 ```
 
-执行流程：
-1. `make compile`：调用 VCS 生成 `sim/out/simv`
-2. `make run`：运行仿真并输出 `sim/out/run.log`、`sim/out/wave.fsdb`
+Execution flow:
+1. `make compile`: invoke VCS and generate `sim/out/simv`
+2. `make run`: run simulation and produce `sim/out/run.log` and `sim/out/wave.fsdb`
 
-测试内容：
-- 异步写时钟 (`wr_clk=100MHz`) / 异步读时钟 (`rd_clk≈71MHz`)
-- 连续写入 `TEST_NUM=DEPTH*4` 笔数据
-- 读端进行对拍检查，自动比较期望值与 `dout`
-- 若有不一致，testbench 直接 `$fatal`
+What this smoke test checks:
+- Asynchronous write clock (`wr_clk=100MHz`) and read clock (`rd_clk≈71MHz`)
+- Continuous writes for `TEST_NUM=DEPTH*4` transactions
+- Scoreboard-style comparison on the read side (`expected` vs `dout`)
+- Immediate `$fatal` on mismatch
 
-## 常用命令
+## Common Commands
 
 ```bash
-make help      # 查看帮助
-make compile   # 仅编译
-make run       # 仅运行（需先 compile）
-make verdi     # 打开 Verdi 并加载 FSDB
-make clean     # 清理仿真产物
+make help      # show help
+make compile   # compile only
+make run       # run only (requires compile first)
+make verdi     # open Verdi and load FSDB
+make clean     # remove simulation artifacts
 ```
 
-## 可选参数
+## Optional Arguments
 
 ```bash
 make smoke SEED=123
 ```
 
-## 交接给验证同事建议
+## Suggested Handoff Notes for Verification
 
-你可以把下面内容作为交接说明：
-- DUT：`rtl/async_fifo.sv`
-- TB：`tb/tb_async_fifo_smoke.sv`
-- filelist：`sim/filelist.f`
-- 冒烟命令：`make smoke`
-- 波形查看：`make verdi`
+You can pass the following information to verification engineers:
+- DUT: `rtl/async_fifo.sv`
+- TB: `tb/tb_async_fifo_smoke.sv`
+- filelist: `sim/filelist.f`
+- smoke command: `make smoke`
+- waveform viewer: `make verdi`
 
 ---
 
-如果你后续要扩展成回归（多用例、多配置、覆盖率统计），可以在当前 Makefile 基础上继续加：
+If you later expand this into a regression flow (multiple tests, configs, and coverage), you can extend the existing Makefile with:
 - `TEST=<case_name>`
-- `COV=1` 开关（VCS coverage）
-- 回归脚本（批量运行 + 汇总 PASS/FAIL）
+- `COV=1` switch (VCS coverage)
+- Regression scripts (batch run + PASS/FAIL summary)

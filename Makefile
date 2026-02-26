@@ -32,7 +32,7 @@ smoke: compile run
 
 compile:
 	@mkdir -p $(OUT_DIR)
-	$(VCS) $(VCS_FLAGS) -o $(SIMV) -l $(CMP_LOG)
+	bsub -q normal -Is $(VCS) $(VCS_FLAGS) -o $(SIMV) -l $(CMP_LOG)
 
 run:
 	@if [ ! -x $(SIMV) ]; then echo "[ERR] $(SIMV) not found, run 'make compile' first"; exit 1; fi
@@ -42,7 +42,7 @@ run:
 
 verdi:
 	@if [ ! -f $(OUT_DIR)/wave.fsdb ]; then echo "[ERR] FSDB not found, run 'make run' first"; exit 1; fi
-	$(VERDI) -sv -f $(FILELIST) -ssf $(OUT_DIR)/wave.fsdb &
+	bsub -q normal -Is $(VERDI) -sv -f $(FILELIST) -ssf $(OUT_DIR)/wave.fsdb &
 
 clean:
 	rm -rf $(OUT_DIR) csrc ucli.key novas* verdiLog *.log
