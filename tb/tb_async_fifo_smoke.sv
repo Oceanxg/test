@@ -20,6 +20,7 @@ module tb_async_fifo_smoke;
     int unsigned wr_idx;
     int unsigned rd_idx;
     int unsigned err_cnt;
+    logic        rd_fire;
 
     async_fifo #(
         .DATA_WIDTH(DATA_WIDTH),
@@ -52,6 +53,7 @@ module tb_async_fifo_smoke;
         rst_n  = 1'b0;
         wr_en  = 1'b0;
         rd_en  = 1'b0;
+        rd_fire = 1'b0;
         din    = '0;
         wr_idx = 0;
         rd_idx = 0;
@@ -93,8 +95,10 @@ module tb_async_fifo_smoke;
 
         forever begin
             @(posedge rd_clk);
-            if (rst_n && rd_en && !empty) begin
+            rd_fire = (rst_n && rd_en && !empty);
+            if (rd_fire) begin
                 logic [DATA_WIDTH-1:0] exp;
+                #1step;
                 if (exp_queue.size() == 0) begin
                     $error("[TB] expected queue empty when receiving data, dout=0x%08h", dout);
                     err_cnt++;
