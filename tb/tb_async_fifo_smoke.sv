@@ -21,9 +21,6 @@ module tb_async_fifo_smoke;
     int unsigned rd_idx;
     int unsigned err_cnt;
 
-    logic [DATA_WIDTH-1:0] exp_pending;
-    logic                  exp_pending_vld;
-
     async_fifo #(
         .DATA_WIDTH(DATA_WIDTH),
         .ADDR_WIDTH(ADDR_WIDTH)
@@ -48,19 +45,17 @@ module tb_async_fifo_smoke;
     initial begin
         $display("[TB] async_fifo smoke start");
         `ifdef DUMP_FSDB
-            $fsdbDumpfile("wave.fsdb");
+            $fsdbDumpfile("sim/out/wave.fsdb");
             $fsdbDumpvars(0, tb_async_fifo_smoke);
         `endif
 
-        rst_n            = 1'b0;
-        wr_en            = 1'b0;
-        rd_en            = 1'b0;
-        din              = '0;
-        wr_idx           = 0;
-        rd_idx           = 0;
-        err_cnt          = 0;
-        exp_pending      = '0;
-        exp_pending_vld  = 1'b0;
+        rst_n  = 1'b0;
+        wr_en  = 1'b0;
+        rd_en  = 1'b0;
+        din    = '0;
+        wr_idx = 0;
+        rd_idx = 0;
+        err_cnt = 0;
 
         repeat (5) @(posedge wr_clk);
         rst_n = 1'b1;
@@ -98,25 +93,18 @@ module tb_async_fifo_smoke;
 
         forever begin
             @(posedge rd_clk);
-
-            // dut 的 dout 在读使能命中后用非阻塞赋值更新，
-            // 所以应在下一拍比较上一拍弹出的期望值。
-            if (exp_pending_vld) begin
-                if (dout !== exp_pending) begin
-                    $error("[TB] mismatch idx=%0d exp=0x%08h got=0x%08h", rd_idx, exp_pending, dout);
-                    err_cnt++;
-                end
-                rd_idx++;
-                exp_pending_vld = 1'b0;
-            end
-
             if (rst_n && rd_en && !empty) begin
+                logic [DATA_WIDTH-1:0] exp;
                 if (exp_queue.size() == 0) begin
                     $error("[TB] expected queue empty when receiving data, dout=0x%08h", dout);
                     err_cnt++;
                 end else begin
-                    exp_pending     = exp_queue.pop_front();
-                    exp_pending_vld = 1'b1;
+                    exp = exp_queue.pop_front();
+                    if (dout !== exp) begin
+                        $error("[TB] mismatch idx=%0d exp=0x%08h got=0x%08h", rd_idx, exp, dout);
+                        err_cnt++;
+                    end
+                    rd_idx++;
                 end
             end
 
