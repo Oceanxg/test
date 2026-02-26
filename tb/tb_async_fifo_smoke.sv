@@ -46,7 +46,7 @@ module tb_async_fifo_smoke;
     initial begin
         $display("[TB] async_fifo smoke start");
         `ifdef DUMP_FSDB
-            $fsdbDumpfile("sim/out/wave.fsdb");
+            $fsdbDumpfile("wave.fsdb");
             $fsdbDumpvars(0, tb_async_fifo_smoke);
         `endif
 
@@ -65,14 +65,18 @@ module tb_async_fifo_smoke;
         fork
             begin : write_proc
                 while (wr_idx < TEST_NUM) begin
-                    @(posedge wr_clk);
+                    @(negedge wr_clk);
                     if (!full) begin
                         wr_en <= 1'b1;
                         din   <= 32'h1A2B_0000 + wr_idx;
-                        exp_queue.push_back(32'h1A2B_0000 + wr_idx);
-                        wr_idx++;
                     end else begin
                         wr_en <= 1'b0;
+                    end
+
+                    @(posedge wr_clk);
+                    if (wr_en && !full) begin
+                        exp_queue.push_back(din);
+                        wr_idx++;
                     end
                 end
                 @(posedge wr_clk);
@@ -81,7 +85,7 @@ module tb_async_fifo_smoke;
 
             begin : read_proc
                 while (rd_idx < TEST_NUM) begin
-                    @(posedge rd_clk);
+                    @(negedge rd_clk);
                     if (!empty) begin
                         rd_en <= 1'b1;
                     end else begin
