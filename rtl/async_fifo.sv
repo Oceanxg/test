@@ -31,6 +31,8 @@ logic [ADDR_WIDTH:0] wr_bin_next;
 logic [ADDR_WIDTH:0] rd_bin_next;
 logic [ADDR_WIDTH:0] wr_gray_next;
 logic [ADDR_WIDTH:0] rd_gray_next;
+logic               full_next;
+logic               empty_next;
 
 logic wr_allow;
 logic rd_allow;
@@ -90,7 +92,23 @@ always_ff @(posedge rd_clk or negedge rst_n) begin
     end
 end
 
-assign full = (wr_gray_next == {~rd_gray_sync2[ADDR_WIDTH:ADDR_WIDTH-1], rd_gray_sync2[ADDR_WIDTH-2:0]});
-assign empty = (rd_gray_next == wr_gray_sync2);
+assign full_next  = (wr_gray_next == {~rd_gray_sync2[ADDR_WIDTH:ADDR_WIDTH-1], rd_gray_sync2[ADDR_WIDTH-2:0]});
+assign empty_next = (rd_gray_next == wr_gray_sync2);
+
+always_ff @(posedge wr_clk or negedge rst_n) begin
+    if (!rst_n) begin
+        full <= 1'b0;
+    end else begin
+        full <= full_next;
+    end
+end
+
+always_ff @(posedge rd_clk or negedge rst_n) begin
+    if (!rst_n) begin
+        empty <= 1'b1;
+    end else begin
+        empty <= empty_next;
+    end
+end
 
 endmodule
